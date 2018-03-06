@@ -30,7 +30,13 @@ class PomodoroLocker():
         self.events.append(self.gpomodoro.StateChanged.connect(self.onPomodoroStateChange))
         self.events.append(self.screensaver.ActiveChanged.connect(self.onScreensaverActiveChange))
         self.loop.run()
+        pauseStart()
 
+    def pauseStart():
+        logging.info("We changed to pomodoro while screensaver is on, force it to pause until the screensaver get unlocked.")
+        self.gpomodoro.Resume()
+        self.restartPausehandler = self.gpomodoro.PropertiesChanged.connect(self.restartPause)
+        
     def onPomodoroStateChange(self, *args):
         newState = args[0]
         oldState = args[1]
@@ -40,9 +46,7 @@ class PomodoroLocker():
         if newState['name'].endswith('-break') and oldState['name'] == 'pomodoro':
             self.screensaver.Lock()
         if newState['name'] == 'pomodoro' and oldState['name'].endswith("-break") and self.screensaver.GetActive():
-            logging.info("We changed to pomodoro while screensaver is on, force it to pause until the screensaver get unlocked.")
-            self.gpomodoro.Resume()
-            self.restartPausehandler = self.gpomodoro.PropertiesChanged.connect(self.restartPause)
+            pauseStart()
 
     def restartPause(self, *args, **argv):
         logging.debug("%s changed" % args[0])
@@ -58,6 +62,7 @@ class PomodoroLocker():
             logging.info("The screensaver is now inactive, Start a pomodoro")
             self.restartPausehandler.disconnect()
             self.gpomodoro.Resume()
+            exit(0)
 
 l = PomodoroLocker()
 l.startListening()

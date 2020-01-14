@@ -1,0 +1,18 @@
+This repositody contain a gnome-pomodoro plugin action to get arround a bug.
+The bug is that gnome-pomodoro start a new pomodoro as soon as there's user
+action after a break. That seems fine, but that is even if the screensaver
+runs and does not get unlocked.
+
+To activate the work around, in gnome-pomodoro settings/Custom action, create
+this action:
+- Name: Stay paused while locked
+- Command: staypaused.py
+- When breaks (any)
+- Triggers: Complete
+
+I force myself to take a break by locking the screen, forcing me to enter my
+password. Using this custom action:
+- Name: Lock when break start
+- Command: gnome-screensaver-command --lock
+- When breaks (any)
+- Triggers: Start, Resume
